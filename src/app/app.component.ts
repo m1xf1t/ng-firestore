@@ -1,16 +1,14 @@
 import { Component } from '@angular/core';
+
+// Import Firestore
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument} from 'angularfire2/firestore';
+
+// Import Observable + Map Operator
 import { Observable } from 'rxjs/observable';
 import 'rxjs/add/operator/map';
 
-interface Post {
-  title: string;
-  content: string;
-}
-
-interface PostId extends Post {
-  id: string;
-}
+// Import Post Interface
+import { Post } from '../models/post';
 
 @Component({
   selector: 'app-root',
@@ -19,23 +17,28 @@ interface PostId extends Post {
 })
 export class AppComponent {
   
+  // Define Posts Collection
   postsCol: AngularFirestoreCollection<Post>;
   posts: any;
 
-  title:string;
-  content:string;
-
+  // Define Post Document
   postDoc: AngularFirestoreDocument<Post>;
   post: Observable<Post>;
 
+  // Define 2-Way Binding for Form
+  title:string;
+  content:string;
+
+  // Create Instance of Firestore
   constructor(private afs: AngularFirestore) {
 
   }
 
   ngOnInit() {
+    // Get All Posts
     this.postsCol = this.afs.collection('posts');
-    //this.postsCol = this.afs.collection('posts', ref => ref.where('title', '==', 'Anderson'));
-    // this.posts = this.postsCol.valueChanges();
+
+    // Listen for changes + Define Document Id
     this.posts = this.postsCol.snapshotChanges()
       .map(actions => {
         return actions.map(a => {
@@ -46,16 +49,18 @@ export class AppComponent {
       }); 
   }
 
+  // Create
   addPost() {
     this.afs.collection('posts').add({'title': this.title, 'content': this.content});
-    // this.afs.collection('posts').doc('my-custom-id').set({'title': this.title, 'content': this.content});
   }
 
+  // Read
   getPost(postId) {
     this.postDoc = this.afs.doc('posts/'+postId);
     this.post = this.postDoc.valueChanges();
   }
 
+  // Delete
   deletePost(postId) {
     this.afs.doc('posts/'+postId).delete();
   }
